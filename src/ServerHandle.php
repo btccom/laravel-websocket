@@ -24,7 +24,7 @@ class ServerHandle
      * 用户监听是否有新数据时间间隔(毫秒)
      * @var int
      */
-    protected $interval = 200;
+    protected $interval = 2000;
 
     /**
      * 测试环境下监听频道与处理程序之间的关系
@@ -103,7 +103,6 @@ class ServerHandle
         foreach ($this->channels as $c => $class) {
             if ($c == $channel) {
                 Log::info("{$c} channel call!");
-
                 /**
                  * @var $Object RedisSubscribe
                  */
@@ -164,6 +163,11 @@ class ServerHandle
         }
     }
 
+    public function async($fd, $data)
+    {
+
+    }
+
     /**
      * 数据监听
      * @param $fd
@@ -209,7 +213,6 @@ class ServerHandle
      */
     public function open($fd)
     {
-
         $this->timer($fd);
     }
 

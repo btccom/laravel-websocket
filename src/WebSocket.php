@@ -38,9 +38,7 @@ class WebSocket extends Container
 
     function handle()
     {
-
         $this->handler = $this->make(ServerHandle::class);
-
         $this->server->start();
     }
 
@@ -106,6 +104,7 @@ class WebSocket extends Container
     public function onMessage($server, $frame)
     {
         $data = json_decode($frame->data, true);
+        $this->handler->sync($frame->fd, $data);
         $this->addTask($frame->fd, '__message__', $data);
     }
 
