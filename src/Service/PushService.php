@@ -26,12 +26,10 @@ class PushService
     {
         if ($values = Redis::sscan(self::Store_fds, 1)) {
             foreach ($values as $key) {
-                Redis::srem(self::Store_fds, $key);
+                // Redis::srem(self::Store_fds, $key);
             }
         }
-
         Log::info("clean push all info !");
-
         Redis::set(self::Store_fds_length, 0);
     }
 

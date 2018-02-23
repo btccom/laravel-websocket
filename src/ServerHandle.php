@@ -122,7 +122,7 @@ class ServerHandle
      */
     protected function publish($channel, $data = '')
     {
-        if (env('APP_ENV') == 'local') {
+        if (env('APP_ENV') === 'local' || config('app.debug')) {
             $this->call($channel, $data);
         } else {
             Queue::push($channel, $data);
