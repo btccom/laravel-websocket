@@ -1,6 +1,7 @@
 <?php
 
 namespace webSocket;
+
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
 
@@ -35,11 +36,11 @@ abstract class RedisSubscribeCommand extends Command
 
         parent::__construct();
 
-        if(!$this->channel){
+        if (!$this->channel) {
             throw new \Exception("not channel!");
         }
 
-        if(!$this->handler){
+        if (!$this->handler) {
             throw new \Exception("not handler!");
         }
     }
@@ -51,17 +52,17 @@ abstract class RedisSubscribeCommand extends Command
      */
     public function handle()
     {
-        $this->laravel->bind(RedisSubscribe::class,$this->handler);
+        $this->laravel->bind(RedisSubscribe::class, $this->handler);
         $instance = $this->laravel->make(RedisSubscribe::class);
 
-        while(true) {
+        while (true) {
             $value = Redis::brpop($this->channel, 0);
 
             $channel = $value[0];
-            $data    = $value[1];
+            $data = $value[1];
 
             $instance->reset();
-            $instance->setData($channel,json_decode($data,true));
+            $instance->setData($channel, json_decode($data, true));
             $instance->handle();
         }
     }

@@ -12,33 +12,35 @@ class PushService
     /**
      * 存储当前在线的fds
      */
-    const Store_fds       = 'redis.set.fds';
+    const Store_fds = 'redis.set.fds';
 
     /**
      * 存储当前fds的长度
      */
-    const Store_fds_length  = 'redis.key.fds.length';
+    const Store_fds_length = 'redis.key.fds.length';
 
     /**
      *   清空缓存数据
      */
-    static public function clean(){
-        if($values  = Redis::sscan(self::Store_fds,1)){
-            foreach( $values as $key){
-                Redis::srem(self::Store_fds,$key);
+    static public function clean()
+    {
+        if ($values = Redis::sscan(self::Store_fds, 1)) {
+            foreach ($values as $key) {
+                Redis::srem(self::Store_fds, $key);
             }
         }
 
         Log::info("clean push all info !");
 
-        Redis::set(self::Store_fds_length,0);
+        Redis::set(self::Store_fds_length, 0);
     }
 
     /**
      * 清理fd下原来的数据
      * @param $fd
      */
-    static public function cleanFdChannel($fd){
+    static public function cleanFdChannel($fd)
+    {
         Queue::clean(self::getFdChannel($fd));
     }
 
@@ -47,18 +49,20 @@ class PushService
      * @param $fd
      * @param $data
      */
-    static public function pushToFdAsync($fd,$data){
-        Queue::push(self::getFdChannel($fd),$data);
+    static public function pushToFdAsync($fd, $data)
+    {
+        Queue::push(self::getFdChannel($fd), $data);
     }
 
     /**
      * 发送消息给所有的fd
      * @param $data
      */
-    static public function pushToAllAsync($data){
-        if($fds = self::getAllFdsFromStore()){
-            foreach($fds as $fd){
-                self::pushToFdAsync($fd,$data);
+    static public function pushToAllAsync($data)
+    {
+        if ($fds = self::getAllFdsFromStore()) {
+            foreach ($fds as $fd) {
+                self::pushToFdAsync($fd, $data);
             }
         }
     }
@@ -68,11 +72,12 @@ class PushService
      * @param $fd
      * @param $data
      */
-    static public function pushToAllOutMeAsync($fd,$data){
-        if($fds = self::getAllFdsFromStore()){
-            foreach($fds as $i){
-                if($i != $fd){
-                    self::pushToFdAsync($i,$data);
+    static public function pushToAllOutMeAsync($fd, $data)
+    {
+        if ($fds = self::getAllFdsFromStore()) {
+            foreach ($fds as $i) {
+                if ($i != $fd) {
+                    self::pushToFdAsync($i, $data);
                 }
             }
         }
@@ -82,7 +87,8 @@ class PushService
      * 获取从Redis得到的激活的连接数
      * @return mixed
      */
-    static public function getAllFdsFromStore(){
+    static public function getAllFdsFromStore()
+    {
         return Redis::smembers(self::Store_fds);
     }
 
@@ -91,16 +97,18 @@ class PushService
      * @param $fd
      * @return string
      */
-    static public function getFdChannel($fd){
-        return "webSocket.fd.".$fd;
+    static public function getFdChannel($fd)
+    {
+        return "webSocket.fd." . $fd;
     }
 
     /**
      * 将fd纳入push服务
      * @param $fd
      */
-    static public function login($fd){
-        Redis::sadd(PushService::Store_fds,$fd);
+    static public function login($fd)
+    {
+        Redis::sadd(PushService::Store_fds, $fd);
         Redis::incr(PushService::Store_fds_length);
     }
 
@@ -108,8 +116,9 @@ class PushService
      * fd推出push服务
      * @param $fd
      */
-    static public function out($fd){
-        Redis::srem(PushService::Store_fds,$fd);
+    static public function out($fd)
+    {
+        Redis::srem(PushService::Store_fds, $fd);
         Redis::decr(PushService::Store_fds_length);
     }
 
@@ -118,8 +127,9 @@ class PushService
      * @param $fd
      * @return bool
      */
-    static public function isLive($fd){
-        return (bool)Redis::sismember(self::Store_fds,$fd);
+    static public function isLive($fd)
+    {
+        return (bool)Redis::sismember(self::Store_fds, $fd);
     }
 
     /**
@@ -129,11 +139,12 @@ class PushService
      * @param array $message
      * @return array
      */
-    static public function results($action,$status,$message = array()){
+    static public function results($action, $status, $message = array())
+    {
         return [
-            'action'=>$action,
-            'status'=>$status,
-            'message'=>$message
+            'action' => $action,
+            'status' => $status,
+            'message' => $message
         ];
     }
 
@@ -143,11 +154,12 @@ class PushService
      * @param array $message
      * @return array
      */
-    static public function success($action,$message = array()){
+    static public function success($action, $message = array())
+    {
         return [
-            'action'=>$action,
-            'status'=>1,
-            'message'=>$message
+            'action' => $action,
+            'status' => 1,
+            'message' => $message
         ];
     }
 
@@ -157,11 +169,12 @@ class PushService
      * @param array $message
      * @return array
      */
-    static public function error($action,$message = array()){
+    static public function error($action, $message = array())
+    {
         return [
-            'action'=>$action,
-            'status'=>0,
-            'message'=>$message
+            'action' => $action,
+            'status' => 0,
+            'message' => $message
         ];
     }
 }

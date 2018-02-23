@@ -2,10 +2,9 @@
 
 namespace webSocket\Commands;
 
-use webSocket\WebSocket;
-use webSocket\ServerHandle;
-use webSocket\Contracts\Queue;
 use Illuminate\Console\Command;
+use webSocket\ServerHandle;
+use webSocket\WebSocket;
 
 abstract class WebSocketCommand extends Command
 {
@@ -42,13 +41,13 @@ abstract class WebSocketCommand extends Command
     {
         ini_set('default_socket_timeout', -1);
 
-        $webSocketConfig =  app('config')->get($this->getConfig());
-        if(!$webSocketConfig){
+        $webSocketConfig = app('config')->get($this->getConfig());
+        if (!$webSocketConfig) {
             throw new \Exception("请设置webSocket配置!");
         }
 
-        $webSocket = new WebSocket($webSocketConfig,$this->laravel);
-        if(!$bindClass = $this->getBindClass()){
+        $webSocket = new WebSocket($webSocketConfig, $this->laravel);
+        if (!$bindClass = $this->getBindClass()) {
             throw new \Exception("请配置需要运行的webSocket类");
         }
         $webSocket->bind(ServerHandle::class, $bindClass);
@@ -56,11 +55,13 @@ abstract class WebSocketCommand extends Command
         $webSocket->handle();
     }
 
-    protected function getConfig(){
+    protected function getConfig()
+    {
         return 'websocket';
     }
 
-    protected function getBindClass(){
+    protected function getBindClass()
+    {
         throw new \Exception("请设置 Handle class 名称！");
     }
 }

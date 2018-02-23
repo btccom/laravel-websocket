@@ -2,17 +2,17 @@
 
 namespace webSocket;
 
-use webSocket\Service\PushService;
-use webSocket\Facades\Queue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
+use webSocket\Facades\Queue;
+use webSocket\Service\PushService;
 
 class ServerHandle
 {
     /**
      * 系统错误提示
      */
-    const SYS_ERROR         = "SysError";
+    const SYS_ERROR = "SysError";
 
     /**
      * swoole websocket实例
@@ -24,14 +24,14 @@ class ServerHandle
      * 用户监听是否有新数据时间间隔(毫秒)
      * @var int
      */
-    protected $interval   = 200;
+    protected $interval = 200;
 
     /**
      * 测试环境下监听频道与处理程序之间的关系
      * @var array
      */
     protected $channels = [];
-    
+
     public function __construct(WebSocket $webSocket)
     {
         PushService::clean();
@@ -40,16 +40,16 @@ class ServerHandle
     }
 
 
-
     /**
      * 反馈给client的结果
-     * @param $action 
+     * @param $action
      * @param $status
      * @param $message
      * @return array
      */
-    public function results($action,$status,$message = array()){
-        return PushService::results($action,$status,$message);
+    public function results($action, $status, $message = array())
+    {
+        return PushService::results($action, $status, $message);
     }
 
     /**
@@ -58,8 +58,9 @@ class ServerHandle
      * @param $key
      * @param array $params
      */
-    public function pushTask($fd, $key, $params = []){
-        return $this->server->addTask($fd,$key,$params);
+    public function pushTask($fd, $key, $params = [])
+    {
+        return $this->server->addTask($fd, $key, $params);
     }
 
 
@@ -68,15 +69,17 @@ class ServerHandle
      * @param $fd
      * @param $data
      */
-    public function pushToFd($fd,$data){
-        $this->server->push($fd,null,$data);
+    public function pushToFd($fd, $data)
+    {
+        $this->server->push($fd, null, $data);
     }
 
     /**
      * 发送消息给所有的fd
      * @param $data
      */
-    public function pushToAll($data){
+    public function pushToAll($data)
+    {
         $this->server->pushAll($data);
     }
 
@@ -85,8 +88,9 @@ class ServerHandle
      * @param $fd
      * @param $data
      */
-    public function pushToAllOutMe($fd,$data){
-        $this->server->pushToAllOutMe($fd,$data);
+    public function pushToAllOutMe($fd, $data)
+    {
+        $this->server->pushToAllOutMe($fd, $data);
     }
 
     /**
@@ -94,16 +98,17 @@ class ServerHandle
      * @param $channel
      * @param $data
      */
-    protected function call($channel,$data){
-        foreach($this->channels as $c => $class){
-            if($c == $channel){
+    protected function call($channel, $data)
+    {
+        foreach ($this->channels as $c => $class) {
+            if ($c == $channel) {
                 Log::info("{$c} channel call!");
 
                 /**
                  * @var $Object RedisSubscribe
                  */
                 $Object = new $class($data);
-                $Object->setData($channel,$data);
+                $Object->setData($channel, $data);
                 $Object->handle();
 
             }
@@ -115,11 +120,12 @@ class ServerHandle
      * @param $channel
      * @param string $data
      */
-    protected function publish($channel,$data = ''){
-        if(env('APP_ENV') =='local'){
-            $this->call($channel,$data);
-        }else{
-            Queue::push($channel,$data);
+    protected function publish($channel, $data = '')
+    {
+        if (env('APP_ENV') == 'local') {
+            $this->call($channel, $data);
+        } else {
+            Queue::push($channel, $data);
         }
     }
 
@@ -129,15 +135,16 @@ class ServerHandle
      * @param $data
      * @return mixed
      */
-    public function message($fd,$data){
-        if(isset($data['type'])){
-            $key = "message_".$data['type'];
-            if(method_exists($this,$key)){
-                return $this->$key($fd,$data);
+    public function message($fd, $data)
+    {
+        if (isset($data['type'])) {
+            $key = "message_" . $data['type'];
+            if (method_exists($this, $key)) {
+                return $this->$key($fd, $data);
             }
         }
 
-        Log::error("message no run ",$data);
+        Log::error("message no run ", $data);
     }
 
     /**
@@ -147,12 +154,13 @@ class ServerHandle
      * @param $data
      * @return array
      */
-    public function task($task,$fd,$data){
-        $key = "task_".$task;
-        if(method_exists($this,$key)){
-            return $this->$task($fd,$data);
-        }else{
-            return $this->results(self::SYS_ERROR,0,'无处理程序');
+    public function task($task, $fd, $data)
+    {
+        $key = "task_" . $task;
+        if (method_exists($this, $key)) {
+            return $this->$task($fd, $data);
+        } else {
+            return $this->results(self::SYS_ERROR, 0, '无处理程序');
         }
     }
 
@@ -160,24 +168,25 @@ class ServerHandle
      * 数据监听
      * @param $fd
      */
-    public function timer($fd){
+    public function timer($fd)
+    {
         $the = $this;
 
-        \swoole_timer_after($this->interval,function () use ($fd,$the){
-            try{
-               // Log::info("{$fd}开始消费！");
+        \swoole_timer_after($this->interval, function () use ($fd, $the) {
+            try {
+                // Log::info("{$fd}开始消费！");
 
-                while($value = Queue::lpop(PushService::getFdChannel($fd))){
-                    $this->pushToFd( $fd, $value );
+                while ($value = Queue::lpop(PushService::getFdChannel($fd))) {
+                    $this->pushToFd($fd, $value);
                 }
 
-                if(PushService::isLive($fd)){
+                if (PushService::isLive($fd)) {
                     $the->timer($fd);
                 }
 
-            }catch (\Exception $e){
+            } catch (\Exception $e) {
 
-                Log::info("timer error:".$e->getMessage());
+                Log::info("timer error:" . $e->getMessage());
 
                 $this->triggerClose($fd);
             }
@@ -189,7 +198,8 @@ class ServerHandle
      * 链接打开之前执行的操作
      * @param $fd
      */
-    public function openBefore($fd){
+    public function openBefore($fd)
+    {
         PushService::cleanFdChannel($fd);
     }
 
@@ -197,7 +207,8 @@ class ServerHandle
      * 打开链接
      * @param $fd
      */
-    public function open($fd){
+    public function open($fd)
+    {
 
         $this->timer($fd);
     }
@@ -206,7 +217,8 @@ class ServerHandle
      * 打开链接之后
      * @param $fd
      */
-    public function openAfter($fd){
+    public function openAfter($fd)
+    {
         Log::info(" {$fd} is open! ");
 
         PushService::login($fd);
@@ -220,7 +232,8 @@ class ServerHandle
      * @param $task_id
      * @param $data
      */
-    public function finish($task_id,$data){
+    public function finish($task_id, $data)
+    {
 
     }
 
@@ -228,7 +241,8 @@ class ServerHandle
      * 链接关闭之前
      * @param $fd
      */
-    public function closeBefore($fd){
+    public function closeBefore($fd)
+    {
 
     }
 
@@ -236,7 +250,8 @@ class ServerHandle
      * 链接关闭
      * @param $fd
      */
-    public function close($fd){
+    public function close($fd)
+    {
 
     }
 
@@ -244,8 +259,10 @@ class ServerHandle
      * 关闭链接之后
      * @param $fd
      */
-    public function closeAfter($fd){
-        log:info($fd." is close !");
+    public function closeAfter($fd)
+    {
+        log:
+        info($fd . " is close !");
 
         PushService::out($fd);
     }
@@ -254,7 +271,8 @@ class ServerHandle
      * 触发关闭事件
      * @param $fd
      */
-    public function triggerClose($fd){
+    public function triggerClose($fd)
+    {
         $this->openBefore($fd);
 
         $this->close($fd);

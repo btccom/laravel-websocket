@@ -2,7 +2,6 @@
 
 namespace webSocket\Providers;
 
-use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\ServiceProvider;
 
 class WebsocketServiceProvider extends ServiceProvider
@@ -15,10 +14,8 @@ class WebsocketServiceProvider extends ServiceProvider
     public function boot()
     {
         $source = realpath(__DIR__.'/../config/config.php');
-        if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
+        if ($this->app->runningInConsole()) {
             $this->publishes([$source => config_path('websocket.php')], 'config');
-        } elseif ($this->app instanceof LumenApplication) {
-            $this->app->configure('websocket');
         }
         $this->mergeConfigFrom($source, 'websocket');
     }

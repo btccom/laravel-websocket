@@ -8,27 +8,27 @@
 
 namespace webSocket;
 
-
 abstract class RedisSubscribe
 {
-   protected $data;
+    protected $data;
 
-   protected $fd;
+    protected $fd;
 
-   protected $channel;
+    protected $channel;
 
-   function setData($channel,$data)
-   {
-       $this->channel = $channel;
-       $this->fd = $data['fd'];
-       $this->data = $data['data'];
-   }
-   
-   function reset(){
-      $this->fd = null;
-      $this->data = null;
-      $this->channel = null;
-   }
-   
-   abstract function handle();
+    public function setData($channel, $data)
+    {
+        $this->channel = $channel;
+        $this->fd = $data['fd'];
+        $this->data = $data['data'];
+    }
+
+    public function reset()
+    {
+        $this->fd = null;
+        $this->data = null;
+        $this->channel = null;
+    }
+
+    abstract public function handle();
 }

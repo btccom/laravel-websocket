@@ -11,8 +11,9 @@ class Queue
      * @param $channel
      * @param $data
      */
-     public function push($channel,$data){
-        Redis::lpush($channel,is_string($data)?$data:json_encode($data));
+    public function push($channel, $data)
+    {
+        Redis::lpush($channel, is_string($data) ? $data : json_encode($data));
     }
 
     /**
@@ -20,9 +21,10 @@ class Queue
      * @param $channel
      * @return mixed
      */
-     public function brpop($channel){
-        while(true){
-            if($value = Redis::brpop($channel, 10)){
+    public function brpop($channel)
+    {
+        while (true) {
+            if ($value = Redis::brpop($channel, 10)) {
                 return $value;
             }
         }
@@ -33,9 +35,10 @@ class Queue
      * @param $channel
      * @return mixed
      */
-     public function blpop($channel){
-        while(true){
-            if($value = Redis::blpop($channel, 10)){
+    public function blpop($channel)
+    {
+        while (true) {
+            if ($value = Redis::blpop($channel, 10)) {
                 return $value;
             }
         }
@@ -46,7 +49,8 @@ class Queue
      * @param $channel
      * @return mixed
      */
-    public function lpop($channel){
+    public function lpop($channel)
+    {
         return Redis::lpop($channel);
     }
 
@@ -54,7 +58,8 @@ class Queue
      * 清空队列
      * @param $channel
      */
-    public function clean($channel){
-        Redis::ltrim($channel,1,0);
+    public function clean($channel)
+    {
+        Redis::ltrim($channel, 1, 0);
     }
 }
