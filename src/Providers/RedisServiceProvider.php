@@ -6,12 +6,13 @@
  * Time: 17:23
  */
 
-namespace webSocket\Redis;
+namespace webSocket\Providers;
 
 use Illuminate\Support\Arr;
+use webSocket\Redis\RedisManagerCli;
+
 class RedisServiceProvider extends \Illuminate\Redis\RedisServiceProvider
 {
-
     /**
      * Register the service provider.
      *
@@ -29,5 +30,4 @@ class RedisServiceProvider extends \Illuminate\Redis\RedisServiceProvider
             return $app['redis']->connection();
         });
     }
-
 }
