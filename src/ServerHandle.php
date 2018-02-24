@@ -163,7 +163,7 @@ class ServerHandle
         }
     }
 
-    public function async($fd, $data)
+    public function sync($fd, $data)
     {
 
     }
