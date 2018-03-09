@@ -64,7 +64,6 @@ class WebSocket extends Container
      */
     public function onOpen($server, $request)
     {
-
         $this->handler->openBefore($request->fd);
 
         if ($pushMsg = $this->handler->open($request->fd)) {
@@ -72,11 +71,10 @@ class WebSocket extends Container
         }
 
         $this->handler->openAfter($request->fd);
-
     }
 
     /**
-     * 但任务发送给服务器
+     * 当任务发送给服务器
      * @param $server
      * @param $task_id
      * @param $from_id

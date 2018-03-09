@@ -21,12 +21,6 @@ class ServerHandle
     protected $server = false;
 
     /**
-     * 用户监听是否有新数据时间间隔(毫秒)
-     * @var int
-     */
-    protected $interval = 2000;
-
-    /**
      * 测试环境下监听频道与处理程序之间的关系
      * @var array
      */
@@ -34,8 +28,6 @@ class ServerHandle
 
     public function __construct(WebSocket $webSocket)
     {
-        PushService::clean();
-
         $this->server = $webSocket;
     }
 
@@ -109,7 +101,6 @@ class ServerHandle
                 $Object = new $class($data);
                 $Object->setData($channel, $data);
                 $Object->handle();
-
             }
         }
     }
@@ -169,36 +160,6 @@ class ServerHandle
     }
 
     /**
-     * 数据监听
-     * @param $fd
-     */
-    public function timer($fd)
-    {
-        $the = $this;
-
-        \swoole_timer_after($this->interval, function () use ($fd, $the) {
-            try {
-                // Log::info("{$fd}开始消费！");
-
-                while ($value = Queue::lpop(PushService::getFdChannel($fd))) {
-                    $this->pushToFd($fd, $value);
-                }
-
-                if (PushService::isLive($fd)) {
-                    $the->timer($fd);
-                }
-
-            } catch (\Exception $e) {
-
-                Log::info("timer error:" . $e->getMessage());
-
-                $this->triggerClose($fd);
-            }
-        });
-
-    }
-
-    /**
      * 链接打开之前执行的操作
      * @param $fd
      */
@@ -213,7 +174,6 @@ class ServerHandle
      */
     public function open($fd)
     {
-        $this->timer($fd);
     }
 
     /**
@@ -223,11 +183,6 @@ class ServerHandle
     public function openAfter($fd)
     {
         Log::info(" {$fd} is open! ");
-
-        PushService::login($fd);
-
-        $length = Redis::get(PushService::Store_fds_length);
-        Log::info("当前 fds length {$length}");
     }
 
     /**
@@ -264,10 +219,7 @@ class ServerHandle
      */
     public function closeAfter($fd)
     {
-        log:
-        info($fd . " is close !");
-
-        PushService::out($fd);
+        log:info($fd . " is close !");
     }
 
     /**
