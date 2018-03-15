@@ -27,7 +27,8 @@ class RedisServiceProvider extends \Illuminate\Redis\RedisServiceProvider
         });
 
         $this->app->bind('redis.connection', function ($app) {
-            return $app['redis']->connection();
+            $config = $app->make('config')->get('websocket.redis_connection', 'default');
+            return $app['redis']->connection($config);
         });
     }
 }
