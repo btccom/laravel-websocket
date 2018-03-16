@@ -23,7 +23,7 @@ class WebSocket extends Container
 
         $this->instance(WebSocket::class, $this);
 
-        $this->server = new \swoole_websocket_server($config['host'], $config['port'], $config['ssl']);
+        $this->server = new \swoole_websocket_server($config['host'], $config['port']);
         $this->server->set(array(
             'task_worker_num' => $config['task_worker_num']
         ));
