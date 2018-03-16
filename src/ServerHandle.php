@@ -94,7 +94,7 @@ class ServerHandle
     {
         foreach ($this->channels as $c => $class) {
             if ($c == $channel) {
-                Log::info("{$c} channel call!");
+                \Log::info("{$c} channel call!");
                 /**
                  * @var $Object RedisSubscribe
                  */
@@ -134,7 +134,7 @@ class ServerHandle
             }
         }
 
-        Log::error("message no run ", $data);
+        \Log::error("message no run ", $data);
     }
 
     /**
@@ -182,7 +182,7 @@ class ServerHandle
      */
     public function openAfter($fd)
     {
-        Log::info(" {$fd} is open! ");
+        \Log::info(" {$fd} is open! ");
     }
 
     /**
@@ -219,7 +219,7 @@ class ServerHandle
      */
     public function closeAfter($fd)
     {
-        log:info($fd . " is close !");
+        \Log::info($fd . " is close !");
     }
 
     /**

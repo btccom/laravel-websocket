@@ -155,7 +155,7 @@ class WebSocket extends Container
             try {
                 $this->server->push($fd, is_array($data) ? json_encode($data) : $data);
             } catch (\ErrorException $e) {
-                Log::warning($fd . " push data error!");
+                \Log::warning($fd . " push data error!");
             }
         }
     }
